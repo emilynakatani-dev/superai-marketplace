@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import Stars from "@/components/Stars";
 import type { Agent, AgentSkill } from "@/lib/agents";
@@ -231,11 +232,20 @@ function SkillCard({ skill }: { skill: AgentSkill }) {
                 <span className="font-mono text-[11px] font-bold uppercase tracking-wide text-accent-soft">
                   {stage.label}
                 </span>
-                {stage.tool && (
-                  <span className="rounded border border-edge-bright bg-panel-2 px-1.5 py-0.5 font-mono text-[10px] text-glow">
-                    {stage.tool}
-                  </span>
-                )}
+                {stage.tool &&
+                  (stage.tool.startsWith("Exa") ? (
+                    <Link
+                      href="/exa"
+                      className="rounded border border-edge-bright bg-panel-2 px-1.5 py-0.5 font-mono text-[10px] text-glow transition-colors hover:border-glow"
+                      title="How agents use Exa"
+                    >
+                      {stage.tool} ↗
+                    </Link>
+                  ) : (
+                    <span className="rounded border border-edge-bright bg-panel-2 px-1.5 py-0.5 font-mono text-[10px] text-glow">
+                      {stage.tool}
+                    </span>
+                  ))}
               </div>
               <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
                 {stage.detail}
