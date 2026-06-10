@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   agentId: string;
@@ -25,16 +25,24 @@ export default function DemoCheckout({
   const router = useRouter();
   const [paying, setPaying] = useState(false);
 
-  function pay() {
-    setPaying(true);
-    // Simulate Stripe processing latency, then bounce back like a real success_url.
-    setTimeout(() => {
+  // Simulate Stripe processing latency, then bounce back like a real
+  // success_url. The timer lives in an effect so unmounting (cancel link,
+  // browser back) clears it instead of completing a cancelled purchase.
+  useEffect(() => {
+    if (!paying) return;
+    const timer = setTimeout(() => {
       router.push(`/agents/${agentId}?purchase=success&demo_session=1`);
     }, 1400);
+    return () => clearTimeout(timer);
+  }, [paying, agentId, router]);
+
+  function pay() {
+    setPaying(true);
   }
 
   return (
     <div className="mx-auto max-w-md px-4 py-14">
+      <h1 className="sr-only">Checkout</h1>
       <div className="mb-4 rounded-lg border border-amber-700/60 bg-amber-950/40 px-3 py-2 text-xs text-amber-300">
         Demo mode — no Stripe keys configured. This simulates Stripe Checkout in
         test mode; no real request is made.
@@ -107,14 +115,20 @@ export default function DemoCheckout({
 
           <Link
             href={`/agents/${agentId}?purchase=cancelled`}
-            className="block text-center text-xs text-slate-500 transition-colors hover:text-white"
+            aria-disabled={paying}
+            tabIndex={paying ? -1 : undefined}
+            className={`block text-center text-xs transition-colors ${
+              paying
+                ? "pointer-events-none text-slate-700"
+                : "text-slate-500 hover:text-white"
+            }`}
           >
             Cancel and return
           </Link>
         </div>
       </div>
 
-      <p className="mt-4 text-center text-[11px] text-slate-600">
+      <p className="mt-4 text-center text-xs text-slate-400">
         Add STRIPE_SECRET_KEY to switch this flow to real Stripe Checkout (test
         mode).
       </p>

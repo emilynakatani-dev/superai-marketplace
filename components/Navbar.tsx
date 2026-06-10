@@ -33,7 +33,7 @@ export default function Navbar() {
             Lionclaw
           </a>
           <span className="rounded-full border border-edge-bright bg-panel-2 px-2.5 py-1 text-xs font-medium text-accent-soft">
-            Stripe sandbox
+            Stripe test mode
           </span>
         </nav>
       </div>

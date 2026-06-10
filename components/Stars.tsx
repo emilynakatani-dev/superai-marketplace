@@ -5,7 +5,14 @@ function StarRow({ className }: { className?: string }) {
   return (
     <span className={`flex ${className ?? ""}`}>
       {Array.from({ length: 5 }, (_, i) => (
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+        <svg
+          key={i}
+          className="shrink-0"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
           <path d={STAR_PATH} fill="currentColor" />
         </svg>
       ))}

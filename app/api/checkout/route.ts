@@ -25,10 +25,9 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    request.headers.get("origin") ??
-    request.nextUrl.origin;
+  // Only platform-controlled sources — this value ends up in Stripe
+  // redirect URLs, so the client-supplied Origin header must not be used.
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
   const isSubscription = agent.pricing.model === "subscription";
 
   try {
@@ -58,6 +57,11 @@ export async function POST(request: NextRequest) {
       success_url: `${origin}/agents/${agent.id}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/agents/${agent.id}?purchase=cancelled`,
       metadata: { agentId: agent.id },
+      // Session metadata doesn't propagate to the underlying objects on
+      // its own; webhooks need it on the subscription / payment intent.
+      ...(isSubscription
+        ? { subscription_data: { metadata: { agentId: agent.id } } }
+        : { payment_intent_data: { metadata: { agentId: agent.id } } }),
     });
 
     if (!session.url) {
@@ -68,8 +72,10 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Stripe checkout failed";
-    return NextResponse.json({ error: message }, { status: 502 });
+    console.error("Stripe checkout failed:", error);
+    return NextResponse.json(
+      { error: "Unable to start checkout. Please try again." },
+      { status: 502 },
+    );
   }
 }

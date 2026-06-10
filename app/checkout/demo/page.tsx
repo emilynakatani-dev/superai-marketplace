@@ -12,6 +12,9 @@ export default async function DemoCheckoutPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // The mock checkout only exists while real Stripe isn't configured.
+  if (process.env.STRIPE_SECRET_KEY) notFound();
+
   const sp = await searchParams;
   const agentId = typeof sp.agent === "string" ? sp.agent : undefined;
   const agent = agentId ? getAgent(agentId) : undefined;

@@ -35,8 +35,24 @@ export default function PurchasePanel({
     if (justPurchased) {
       localStorage.setItem(storageKey, "1");
     }
+    // localStorage only exists on the client, so the SSR markup must render
+    // un-owned and the real state is applied in a second pass after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOwned(localStorage.getItem(storageKey) === "1");
   }, [storageKey, justPurchased]);
+
+  // Returning via the browser's back/forward cache restores React state
+  // as-is, which would leave the button stuck on "Redirecting…".
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setLoading(false);
+        setError(null);
+      }
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   async function buy() {
     setLoading(true);
@@ -112,16 +128,23 @@ export default function PurchasePanel({
         </button>
       )}
 
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-2 text-xs text-red-400">
+          {error}
+        </p>
+      )}
 
       {!owned && (
-        <p className="mt-3 text-center text-[11px] text-slate-600">
-          Stripe test mode — use card 4242 4242 4242 4242
+        <p className="mt-3 text-center text-xs text-slate-400">
+          Stripe test mode — use card{" "}
+          <span className="font-mono text-slate-300 select-all">
+            4242 4242 4242 4242
+          </span>
         </p>
       )}
 
       <div className="mt-5 border-t border-edge pt-4">
-        <h4 className="flex items-center gap-2 text-sm font-semibold text-white">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
           Export to harness
           {!owned && (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -141,7 +164,7 @@ export default function PurchasePanel({
               />
             </svg>
           )}
-        </h4>
+        </h3>
         <p className="mt-1 text-xs text-slate-500">
           {owned
             ? "Download the agent config and run it on your own stack."
@@ -154,20 +177,19 @@ export default function PurchasePanel({
                 key={h.id}
                 href={`/api/export/${agentId}?format=${h.id}`}
                 download
-                className="rounded-lg border border-edge-bright bg-panel-2 px-2 py-2 text-center transition-colors hover:border-accent hover:text-white"
+                className="group rounded-lg border border-edge-bright bg-panel-2 px-2 py-2 text-center transition-colors hover:border-accent"
               >
-                <span className="block text-xs font-semibold text-slate-200">
+                <span className="block text-xs font-semibold text-slate-200 transition-colors group-hover:text-white">
                   {h.label}
                 </span>
-                <span className="block font-mono text-[10px] text-slate-500">
+                <span className="block font-mono text-[10px] text-slate-500 transition-colors group-hover:text-slate-300">
                   {h.file}
                 </span>
               </a>
             ) : (
               <span
                 key={h.id}
-                className="cursor-not-allowed rounded-lg border border-edge bg-night px-2 py-2 text-center opacity-50"
-                title="Purchase to unlock"
+                className="cursor-not-allowed rounded-lg border border-edge bg-night px-2 py-2 text-center"
               >
                 <span className="block text-xs font-semibold text-slate-400">
                   {h.label}

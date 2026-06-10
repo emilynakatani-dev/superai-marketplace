@@ -62,7 +62,7 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
                 alt={`${agent.name} avatar`}
                 width={96}
                 height={96}
-                priority
+                preload
                 className="h-24 w-24 rounded-[13px] object-cover"
               />
             </span>
@@ -100,6 +100,19 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
                 {s}
               </span>
             ))}
+          </div>
+
+          {/* On phones the right column stacks below the fold, so the
+              purchase panel also renders here, right under the header. */}
+          <div className="mt-6 lg:hidden">
+            <PurchasePanel
+              agentId={agent.id}
+              agentName={agent.name}
+              pricingModel={agent.pricing.model}
+              amount={agent.pricing.amount}
+              justPurchased={justPurchased}
+              cancelled={cancelled}
+            />
           </div>
 
           <section className="mt-8">
@@ -178,14 +191,16 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
 
         {/* Right column — purchase + creator */}
         <div className="space-y-5 lg:sticky lg:top-24 lg:self-start">
-          <PurchasePanel
-            agentId={agent.id}
-            agentName={agent.name}
-            pricingModel={agent.pricing.model}
-            amount={agent.pricing.amount}
-            justPurchased={justPurchased}
-            cancelled={cancelled}
-          />
+          <div className="hidden lg:block">
+            <PurchasePanel
+              agentId={agent.id}
+              agentName={agent.name}
+              pricingModel={agent.pricing.model}
+              amount={agent.pricing.amount}
+              justPurchased={justPurchased}
+              cancelled={cancelled}
+            />
+          </div>
 
           <div className="rounded-2xl border border-edge bg-panel p-5">
             <h3 className="text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -209,6 +224,7 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
                     height="14"
                     viewBox="0 0 24 24"
                     fill="none"
+                    role="img"
                     aria-label="Verified expert"
                   >
                     <circle cx="12" cy="12" r="10" fill="#3b82f6" />

@@ -15,7 +15,11 @@ function exportPrompt(agent: Agent): string {
   return `${agent.systemPrompt}\n\nExpert workflow — follow these steps in order:\n${steps}`;
 }
 
-/** Mirrors the Lionclaw agents/<name>/agent.json5 format (credentials and channels stripped). */
+/**
+ * Mirrors the Lionclaw agents/<name>/agent.json5 format. Credentials and
+ * channels are stripped, and security/memory/backend are reset to the safe
+ * Lionclaw baseline rather than copied from the source agent.
+ */
 function lionclawExport(agent: Agent): ExportFile {
   const config = {
     name: agent.id,
@@ -87,26 +91,32 @@ function yamlMultiline(text: string, indent: string): string {
 }
 
 function hermesExport(agent: Agent): ExportFile {
+  // JSON.stringify everywhere: JSON strings are valid YAML double-quoted
+  // scalars, which keeps colons/quotes/indicators in values from breaking
+  // the manifest.
   const tools =
     agent.tools.length > 0
-      ? agent.tools.map((t) => `    - ${t}`).join("\n")
+      ? agent.tools.map((t) => `    - ${JSON.stringify(t)}`).join("\n")
       : "    []";
   const mcp =
     agent.mcpServers.length > 0
       ? agent.mcpServers
-          .map((m) => `    - url: ${m.url}\n      transport: ${m.transport}`)
+          .map(
+            (m) =>
+              `    - url: ${JSON.stringify(m.url)}\n      transport: ${JSON.stringify(m.transport)}\n      enabled: ${m.enabled}`,
+          )
           .join("\n")
       : "    []";
   const body = `# Hermes agent manifest — exported from CloneMarket
 apiVersion: hermes/v1
 kind: Agent
 metadata:
-  name: ${agent.id}
-  displayName: ${agent.name}
+  name: ${JSON.stringify(agent.id)}
+  displayName: ${JSON.stringify(agent.name)}
   description: ${JSON.stringify(agent.tagline)}
   creator: ${JSON.stringify(agent.creator.name)}
 spec:
-  model: ${agent.model}
+  model: ${JSON.stringify(agent.model)}
   systemPrompt: |
 ${yamlMultiline(exportPrompt(agent), "    ")}
   tools:
