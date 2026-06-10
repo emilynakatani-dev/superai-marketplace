@@ -20,12 +20,27 @@ export default function Home() {
   const totalRuns = agents.reduce((sum, a) => sum + a.runs, 0);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6">
-      {/* Hero */}
-      <section className="py-16 text-center sm:py-24">
-        <span className="inline-block rounded-full border border-edge-bright bg-panel-2 px-3 py-1 text-xs font-medium text-accent-soft">
-          SuperAI 2026 · expert agent marketplace
-        </span>
+    <>
+      {/* Hero — full-bleed looping video background */}
+      <section className="relative overflow-hidden border-b border-edge">
+        <video
+          className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        >
+          <source src="/hero-bg.mp4" type="video/mp4" />
+        </video>
+        {/* Scrim: keeps text readable and blends the video into the page */}
+        <div className="absolute inset-0 bg-gradient-to-b from-night/75 via-night/85 to-night" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-28">
+          <span className="inline-block rounded-full border border-edge-bright bg-panel-2/80 px-3 py-1 text-xs font-medium text-accent-soft backdrop-blur-sm">
+            SuperAI 2026 · expert agent marketplace
+          </span>
         <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-6xl">
           Every expert,{" "}
           <span className="bg-gradient-to-r from-accent-soft to-glow bg-clip-text text-transparent">
@@ -68,11 +83,13 @@ export default function Home() {
               </dd>
             </div>
           ))}
-        </dl>
+          </dl>
+        </div>
       </section>
 
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
       {/* Agents grid */}
-      <section id="agents" className="scroll-mt-20 pb-16">
+      <section id="agents" className="scroll-mt-20 pt-16 pb-16">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white">Hire an expert agent</h2>
           <p className="mt-1 text-sm text-slate-400">
@@ -120,6 +137,7 @@ export default function Home() {
           </p>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
