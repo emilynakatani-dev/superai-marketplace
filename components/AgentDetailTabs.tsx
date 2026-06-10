@@ -1,17 +1,36 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Stars from "@/components/Stars";
+import type { AvatarViewerStatus } from "@/components/AvatarViewer";
 import type { Agent, AgentSkill } from "@/lib/agents";
+import { avatars3d } from "@/lib/avatars3d";
 
-type Tab = "overview" | "skills" | "reviews";
+// The 3D viewer pulls in @google/model-viewer (three.js inside) — load it
+// only on the client, and only once the Avatar tab is opened.
+const AvatarViewer = dynamic(() => import("@/components/AvatarViewer"), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="h-[480px] w-full animate-pulse rounded-xl border border-edge bg-panel"
+      aria-hidden="true"
+    />
+  ),
+});
+
+type Tab = "overview" | "avatar" | "skills" | "reviews";
 
 export default function AgentDetailTabs({ agent }: { agent: Agent }) {
   const [tab, setTab] = useState<Tab>("overview");
+  // The "new" attention badge on the assets tab clears on first visit.
+  const [assetsSeen, setAssetsSeen] = useState(false);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
+    { id: "avatar", label: "Avatar & Assets" },
     { id: "skills", label: `Skills (${agent.skills.length})` },
     { id: "reviews", label: `Reviews (${agent.reviewCount})` },
   ];
@@ -28,20 +47,37 @@ export default function AgentDetailTabs({ agent }: { agent: Agent }) {
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              if (t.id === "avatar") setAssetsSeen(true);
+            }}
             className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
               tab === t.id
                 ? "border-accent text-white"
-                : "border-transparent text-slate-500 hover:text-slate-300"
+                : t.id === "avatar" && !assetsSeen
+                  ? "border-transparent text-accent-soft hover:text-white"
+                  : "border-transparent text-slate-500 hover:text-slate-300"
             }`}
           >
             {t.label}
+            {t.id === "avatar" && !assetsSeen && (
+              <span className="relative ml-2 inline-flex items-center gap-1 rounded-full border border-accent/60 bg-accent/15 px-1.5 py-0.5 align-middle text-[9px] font-bold tracking-wider text-accent-soft uppercase">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75 motion-reduce:hidden" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+                </span>
+                new
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       <div className="mt-6">
-        {tab === "overview" && <OverviewTab agent={agent} />}
+        {tab === "overview" && (
+          <OverviewTab agent={agent} onShowAssets={() => setTab("avatar")} />
+        )}
+        {tab === "avatar" && <AvatarTab agent={agent} />}
         {tab === "skills" && <SkillsTab agent={agent} />}
         {tab === "reviews" && <ReviewsTab agent={agent} />}
       </div>
@@ -49,7 +85,13 @@ export default function AgentDetailTabs({ agent }: { agent: Agent }) {
   );
 }
 
-function OverviewTab({ agent }: { agent: Agent }) {
+function OverviewTab({
+  agent,
+  onShowAssets,
+}: {
+  agent: Agent;
+  onShowAssets: () => void;
+}) {
   return (
     <div className="space-y-8">
       <section>
@@ -108,7 +150,251 @@ function OverviewTab({ agent }: { agent: Agent }) {
         </ol>
       </section>
 
+      <section>
+        <h2 className="text-lg font-semibold text-white">
+          Included with purchase
+        </h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-edge bg-panel px-4 py-3">
+            <h3 className="text-sm font-semibold text-white">
+              Portable agent config
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-slate-400">
+              Export the full workflow to{" "}
+              <span className="font-mono text-accent-soft">Lionclaw</span>,{" "}
+              <span className="font-mono text-accent-soft">OpenClaw</span> or{" "}
+              <span className="font-mono text-accent-soft">Hermes</span> from
+              the purchase panel — watermarked and licensed to you.
+            </p>
+          </div>
+          <div className="rounded-xl border border-edge bg-panel px-4 py-3">
+            <h3 className="text-sm font-semibold text-white">
+              Avatar asset pack
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-slate-400">
+              Lionclaw-ready pixel sprite sheets (stance poses + walk cycle)
+              {avatars3d[agent.id]?.glb ? " and the rigged 3D model" : ""} —
+              each downloadable separately once you own {agent.name}.
+            </p>
+            <span className="relative mt-3 inline-flex">
+              <span
+                className="absolute inset-0 animate-ping rounded-lg bg-accent/40 [animation-duration:2.5s] motion-reduce:hidden"
+                aria-hidden="true"
+              />
+              <button
+                onClick={onShowAssets}
+                className="relative inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent to-blue-500 px-3.5 py-2 text-xs font-semibold text-white transition-all hover:brightness-110"
+              >
+                <span aria-hidden="true">✨</span>
+                Preview the assets
+                <span aria-hidden="true">→</span>
+              </button>
+            </span>
+          </div>
+        </div>
+      </section>
+
       <UnderTheHood agent={agent} />
+    </div>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="5"
+        y="11"
+        width="14"
+        height="9"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+function AvatarTab({ agent }: { agent: Agent }) {
+  const a3d = avatars3d[agent.id];
+  const hasModel = Boolean(a3d?.glb);
+  const poster = a3d?.poster ?? agent.avatar;
+  const [owned, setOwned] = useState(false);
+  const [viewerStatus, setViewerStatus] =
+    useState<AvatarViewerStatus>("loading");
+
+  const chip = !hasModel
+    ? "3D model coming soon"
+    : viewerStatus === "unsupported"
+      ? "3D needs WebGL — showing a still"
+      : viewerStatus === "error"
+        ? "3D failed to load — showing a still"
+        : "drag to rotate · idle animation";
+
+  // Ownership is written by the purchase flow (see PurchasePanel); the SSR
+  // markup renders locked and the real state applies after mount.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOwned(localStorage.getItem(`project-mural:owned:${agent.id}`) === "1");
+  }, [agent.id]);
+
+  const downloads: {
+    label: string;
+    file: string;
+    kind: string;
+    preview?: string;
+  }[] = [];
+  if (a3d?.sheets) {
+    downloads.push(
+      {
+        label: "Stance poses",
+        file: a3d.sheets.stance,
+        kind: "sprite sheet · png",
+        preview: a3d.sheets.stancePreview,
+      },
+      {
+        label: "Walk cycle",
+        file: a3d.sheets.motion,
+        kind: "sprite sheet · png",
+        preview: a3d.sheets.motionPreview,
+      },
+    );
+  }
+  if (a3d?.glb) {
+    downloads.push({
+      label: "Rigged 3D model",
+      file: a3d.glb,
+      kind: "glb · idle animation",
+    });
+  }
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-2xl border border-edge bg-panel p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-white">
+            Meet {agent.name} in 3D
+          </h2>
+          <span className="rounded-full border border-edge-bright bg-panel-2 px-2.5 py-1 text-[11px] font-medium text-accent-soft">
+            {chip}
+          </span>
+        </div>
+
+        <div className="mt-4">
+          <AvatarViewer
+            src={a3d?.glb}
+            poster={poster}
+            alt={
+              hasModel
+                ? `${agent.name} 3D avatar`
+                : `${agent.name} avatar concept art`
+            }
+            onStatusChange={setViewerStatus}
+          />
+        </div>
+
+        <p className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+          <span>
+            {hasModel
+              ? "Rigged and animated — the avatar this agent wears across Project Mural and Lionclaw."
+              : `${agent.name}'s rigged avatar is in production — concept art for now.`}
+          </span>
+          {hasModel && (
+            <a
+              href="https://www.meshy.ai"
+              target="_blank"
+              rel="noreferrer"
+              className="shrink-0 transition-colors hover:text-accent-soft"
+            >
+              Built with MeshyAI ↗
+            </a>
+          )}
+        </p>
+      </section>
+
+      {downloads.length > 0 && (
+        <section className="rounded-2xl border border-edge bg-panel p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+              Avatar asset pack
+              {!owned && <LockIcon className="text-slate-500" />}
+            </h2>
+            <span className="rounded-full border border-edge-bright bg-panel-2 px-2.5 py-1 text-[11px] font-medium text-accent-soft">
+              {owned
+                ? "unlocked — yours to download"
+                : "downloads unlock with purchase"}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-slate-400">
+            Pixel sprite sheets in the same chibi style as the Lionclaw office
+            — drop them straight in and {agent.name} walks the floor
+            {a3d?.glb ? ", plus the rigged 3D model" : ""}. Included with
+            purchase; each file downloads separately.
+          </p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {downloads.map((d) => (
+              <div
+                key={d.label}
+                className="overflow-hidden rounded-xl border border-edge bg-night/60"
+              >
+                <div className="flex aspect-square items-center justify-center">
+                  <Image
+                    src={d.preview ?? poster}
+                    alt={
+                      d.preview
+                        ? `${agent.name} ${d.label.toLowerCase()} sprite sheet preview`
+                        : `${agent.name} 3D model preview`
+                    }
+                    width={512}
+                    height={512}
+                    className={
+                      d.preview
+                        ? "h-full w-full object-cover"
+                        : "h-full w-auto object-contain p-3"
+                    }
+                  />
+                </div>
+                <div className="border-t border-edge p-3">
+                  <p className="text-sm font-semibold text-white">{d.label}</p>
+                  <p className="mt-0.5 font-mono text-[10px] text-slate-500">
+                    {d.kind}
+                  </p>
+                  {owned ? (
+                    <a
+                      href={d.file}
+                      download
+                      className="mt-2 block rounded-lg border border-edge-bright bg-panel-2 px-3 py-1.5 text-center text-xs font-semibold text-slate-200 transition-colors hover:border-accent hover:text-white"
+                    >
+                      Download
+                    </a>
+                  ) : (
+                    <span className="mt-2 flex cursor-not-allowed items-center justify-center gap-1.5 rounded-lg border border-edge bg-night px-3 py-1.5 text-xs font-medium text-slate-500">
+                      <LockIcon />
+                      Locked
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {!owned && (
+            <p className="mt-3 text-xs text-slate-500">
+              Buy {agent.name} from the purchase panel to unlock every download
+              — licensed to you, no redistribution.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

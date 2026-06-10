@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Stars from "@/components/Stars";
 import { formatPrice, getAgentCredits, type Agent } from "@/lib/agents";
+import { avatars3d } from "@/lib/avatars3d";
 
 export default function AgentCard({ agent }: { agent: Agent }) {
   const credits = getAgentCredits(agent);
@@ -46,6 +47,10 @@ export default function AgentCard({ agent }: { agent: Agent }) {
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className="rounded-md border border-accent/50 bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent-soft">
+          <span aria-hidden="true">✨</span>{" "}
+          {avatars3d[agent.id]?.glb ? "3D avatar + asset pack" : "avatar asset pack"}
+        </span>
         {agent.specialties.slice(0, 3).map((s) => (
           <span
             key={s}

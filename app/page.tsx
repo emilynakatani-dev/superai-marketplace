@@ -1,4 +1,5 @@
 import AgentCard from "@/components/AgentCard";
+import OfficeView from "@/components/OfficeView";
 import { agents } from "@/lib/agents";
 
 const HOW_IT_WORKS = [
@@ -102,6 +103,20 @@ export default function Home() {
             <AgentCard key={agent.id} agent={agent} />
           ))}
         </div>
+      </section>
+
+      {/* Office view — the agents at home on Lionclaw */}
+      <section id="office" className="scroll-mt-20 pb-16">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white">
+            Inside the Lionclaw office
+          </h2>
+          <p className="mt-1 text-sm text-slate-400">
+            Every Project Mural agent lives in a shared virtual office on
+            Lionclaw — here&apos;s the team on a coffee break between runs.
+          </p>
+        </div>
+        <OfficeView />
       </section>
 
       {/* How it works */}
