@@ -34,8 +34,9 @@ export default function Home() {
         >
           <source src="/hero-bg.mp4" type="video/mp4" />
         </video>
-        {/* Scrim: keeps text readable and blends the video into the page */}
-        <div className="absolute inset-0 bg-gradient-to-b from-night/75 via-night/85 to-night" />
+        {/* Scrim: light enough to show the video, dark enough to keep text
+            legible, with a solid base that blends into the page below */}
+        <div className="absolute inset-0 bg-gradient-to-b from-night/30 via-night/45 to-night" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-28">
           <span className="inline-block rounded-full border border-edge-bright bg-panel-2/80 px-3 py-1 text-xs font-medium text-accent-soft backdrop-blur-sm">
