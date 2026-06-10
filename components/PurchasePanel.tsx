@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CURRENCIES, DEFAULT_CURRENCY, getCurrency } from "@/lib/currencies";
 
 interface Props {
   agentId: string;
@@ -28,7 +29,9 @@ export default function PurchasePanel({
   const [owned, setOwned] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY);
 
+  const currency = getCurrency(currencyCode);
   const storageKey = `project-mural:owned:${agentId}`;
 
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function PurchasePanel({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId }),
+        body: JSON.stringify({ agentId, currency: currencyCode }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -90,7 +93,10 @@ export default function PurchasePanel({
       )}
 
       <div className="flex items-baseline gap-1.5">
-        <span className="text-3xl font-bold text-white">${amount}</span>
+        <span className="text-3xl font-bold text-white">
+          {currency.symbol}
+          {amount}
+        </span>
         <span className="text-sm text-slate-400">
           {isSub ? "/ month" : "one-time"}
         </span>
@@ -100,6 +106,35 @@ export default function PurchasePanel({
           ? "Recurring subscription — unlimited runs while active."
           : "Single payment — yours forever, unlimited runs."}
       </p>
+
+      {!owned && (
+        <div className="mt-4">
+          <label className="flex items-center justify-between gap-2 text-xs text-slate-400">
+            <span>Pay in</span>
+            <select
+              value={currencyCode}
+              onChange={(e) => setCurrencyCode(e.target.value)}
+              disabled={loading}
+              aria-label="Payment currency"
+              className="rounded-lg border border-edge-bright bg-night px-2 py-1.5 text-xs text-slate-200 outline-none focus-visible:border-accent disabled:opacity-60"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+            International cards accepted in every currency.
+            {!isSub && currency.localMethod
+              ? ` ${currency.flag} ${currency.label} also offers ${currency.localMethod} at checkout.`
+              : isSub
+                ? " Subscriptions are billed by card."
+                : ""}
+          </p>
+        </div>
+      )}
 
       {owned ? (
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-700/60 bg-emerald-950/30 px-4 py-3 text-sm font-medium text-emerald-300">
@@ -123,8 +158,8 @@ export default function PurchasePanel({
           {loading
             ? "Redirecting to checkout…"
             : isSub
-              ? `Subscribe — $${amount}/mo`
-              : `Buy ${agentName} — $${amount}`}
+              ? `Subscribe — ${currency.symbol}${amount}/mo`
+              : `Buy ${agentName} — ${currency.symbol}${amount}`}
         </button>
       )}
 

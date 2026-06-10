@@ -1,11 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { getAgent } from "@/lib/agents";
+import { CURRENCY_CODES, DEFAULT_CURRENCY } from "@/lib/currencies";
 
 export async function POST(request: NextRequest) {
   let agentId: unknown;
+  let currencyInput: unknown;
   try {
-    ({ agentId } = await request.json());
+    ({ agentId, currency: currencyInput } = await request.json());
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -14,6 +16,14 @@ export async function POST(request: NextRequest) {
   if (!agent) {
     return NextResponse.json({ error: "Unknown agent" }, { status: 400 });
   }
+
+  // Currency drives which local payment methods Stripe surfaces. Validate
+  // against the allowlist; fall back to the default.
+  const currency =
+    typeof currencyInput === "string" &&
+    CURRENCY_CODES.includes(currencyInput.toLowerCase())
+      ? currencyInput.toLowerCase()
+      : DEFAULT_CURRENCY;
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -38,7 +48,7 @@ export async function POST(request: NextRequest) {
         {
           quantity: 1,
           price_data: {
-            currency: agent.pricing.currency,
+            currency,
             unit_amount: agent.pricing.amount * 100,
             product_data: {
               name: `${agent.name} — expert agent`,
@@ -56,7 +66,12 @@ export async function POST(request: NextRequest) {
       ],
       success_url: `${origin}/agents/${agent.id}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/agents/${agent.id}?purchase=cancelled`,
-      metadata: { agentId: agent.id },
+      // Collect a billing country so the customer can change it and see the
+      // payment methods refine. Payment methods themselves are dynamic
+      // (no payment_method_types set) — Stripe shows what's eligible for the
+      // currency + account, e.g. PayNow for SGD one-time payments.
+      billing_address_collection: "required",
+      metadata: { agentId: agent.id, currency },
       // Session metadata doesn't propagate to the underlying objects on
       // its own; webhooks need it on the subscription / payment intent.
       ...(isSubscription
