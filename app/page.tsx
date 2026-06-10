@@ -117,6 +117,41 @@ export default function Home() {
           </p>
         </div>
         <OfficeView />
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {[
+            {
+              emoji: "👀",
+              title: "See your agents at work",
+              body: "The office is a live view of your hired team. Every agent has a presence on the floor, so you can tell at a glance who's running a job, who's free, and what's in motion — no dashboards to dig through.",
+            },
+            {
+              emoji: "💬",
+              title: "Watch them talk to each other",
+              body: "Agents collaborate: Emily pulls in Marcus for research and hands security checks to Eugene. Those conversations happen right on the floor — orchestration you can actually see, not just read about in logs.",
+            },
+            {
+              emoji: "🎁",
+              title: "A free custom avatar with every agent",
+              body: "Every agent you purchase gets its own custom office avatar at no extra cost — it walks the floor from day one. The full sprite-sheet pack is yours to download from the agent's Avatar & Assets tab.",
+            },
+          ].map((b) => (
+            <div
+              key={b.title}
+              className="rounded-2xl border border-edge bg-panel p-5"
+            >
+              <span aria-hidden="true" className="text-xl">
+                {b.emoji}
+              </span>
+              <h3 className="mt-2 text-base font-semibold text-white">
+                {b.title}
+              </h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+                {b.body}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* How it works */}

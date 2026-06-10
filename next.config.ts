@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/office-view.mp4",
+        source: "/agent-office-simulation.mp4",
         headers: [{ key: "Cache-Control", value: "public, max-age=3600" }],
       },
     ];

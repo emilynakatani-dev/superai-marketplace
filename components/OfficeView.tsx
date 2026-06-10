@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-const POSTER = "/office-view-poster.webp";
+const POSTER = "/agent-office-simulation-poster.webp";
 const ALT =
   "The Lionclaw virtual office, with all five Project Mural agents at the coffee bar";
 
@@ -54,7 +54,7 @@ export default function OfficeView() {
             // If autoplay is blocked there's no pause event — sync the label.
             onLoadedData={(e) => setPlaying(!e.currentTarget.paused)}
           >
-            <source src="/office-view.mp4" type="video/mp4" />
+            <source src="/agent-office-simulation.mp4" type="video/mp4" />
           </video>
         ) : (
           // Same URL as the video poster, so the browser cache is shared.
