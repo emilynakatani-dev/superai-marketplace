@@ -62,7 +62,7 @@ export default function OfficeView() {
             src={POSTER}
             alt={ALT}
             width={1440}
-            height={855}
+            height={854}
             unoptimized
             className="w-full"
           />
