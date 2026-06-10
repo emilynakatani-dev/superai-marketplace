@@ -1,4 +1,5 @@
 import AgentCard from "@/components/AgentCard";
+import CollabDemo from "@/components/CollabDemo";
 import OfficeView from "@/components/OfficeView";
 import { agents } from "@/lib/agents";
 
@@ -118,7 +119,13 @@ export default function Home() {
         </div>
         <OfficeView />
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <p className="mt-8 text-sm font-semibold text-accent-soft">
+          An excellent agent overview — every action is animated live,
+          including agents walking over to talk to each other.
+        </p>
+        <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,420px)_1fr]">
+          <CollabDemo />
+          <div className="grid gap-4">
           {[
             {
               emoji: "👀",
@@ -151,6 +158,7 @@ export default function Home() {
               </p>
             </div>
           ))}
+          </div>
         </div>
       </section>
 

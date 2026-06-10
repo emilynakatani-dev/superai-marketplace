@@ -25,8 +25,6 @@ type Tab = "overview" | "avatar" | "skills" | "reviews";
 
 export default function AgentDetailTabs({ agent }: { agent: Agent }) {
   const [tab, setTab] = useState<Tab>("overview");
-  // The "new" attention badge on the assets tab clears on first visit.
-  const [assetsSeen, setAssetsSeen] = useState(false);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -47,26 +45,31 @@ export default function AgentDetailTabs({ agent }: { agent: Agent }) {
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
-            onClick={() => {
-              setTab(t.id);
-              if (t.id === "avatar") setAssetsSeen(true);
-            }}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            onClick={() => setTab(t.id)}
+            className={`relative -mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
               tab === t.id
                 ? "border-accent text-white"
-                : t.id === "avatar" && !assetsSeen
+                : t.id === "avatar"
                   ? "border-transparent text-accent-soft hover:text-white"
                   : "border-transparent text-slate-500 hover:text-slate-300"
             }`}
           >
+            {t.id === "avatar" && (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-5 left-1/2 flex -translate-x-1/2 items-center gap-0.5 text-[10px] font-bold whitespace-nowrap text-accent-soft motion-safe:animate-bounce"
+              >
+                click me 👇
+              </span>
+            )}
             {t.label}
-            {t.id === "avatar" && !assetsSeen && (
+            {t.id === "avatar" && (
               <span className="relative ml-2 inline-flex items-center gap-1 rounded-full border border-accent/60 bg-accent/15 px-1.5 py-0.5 align-middle text-[9px] font-bold tracking-wider text-accent-soft uppercase">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75 motion-reduce:hidden" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
                 </span>
-                new
+                <span aria-hidden="true">🎉</span> new
               </span>
             )}
           </button>
@@ -185,9 +188,11 @@ function OverviewTab({
                 onClick={onShowAssets}
                 className="relative inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-accent to-blue-500 px-3.5 py-2 text-xs font-semibold text-white transition-all hover:brightness-110"
               >
-                <span aria-hidden="true">✨</span>
+                <span aria-hidden="true" className="motion-safe:animate-bounce">
+                  👉
+                </span>
                 Preview the assets
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true">🎉</span>
               </button>
             </span>
           </div>

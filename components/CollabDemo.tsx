@@ -3,14 +3,14 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-const POSTER = "/agent-office-simulation-poster.webp";
+const POSTER = "/agent-collab-demo-poster.webp";
 const ALT =
-  "The Lionclaw virtual office, with all five Project Mural agents at the coffee bar";
+  "Eugene the frog agent running over to Carlos to work together in the Lionclaw office";
 
-/** Looping office-view clip. The video only mounts on the client for users
- *  without prefers-reduced-motion — everyone else gets the still, and the
- *  mp4 is never downloaded. A toggle lets anyone pause the loop. */
-export default function OfficeView() {
+/** Square close-up clip: Eugene spots Carlos working and runs over to pair
+ *  up. Client-mounted so reduced-motion users get the still and never
+ *  download the mp4; anyone can pause. */
+export default function CollabDemo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showVideo, setShowVideo] = useState(false);
   const [playing, setPlaying] = useState(true);
@@ -51,18 +51,16 @@ export default function OfficeView() {
             aria-label={ALT}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            // If autoplay is blocked there's no pause event — sync the label.
             onLoadedData={(e) => setPlaying(!e.currentTarget.paused)}
           >
-            <source src="/agent-office-simulation.mp4" type="video/mp4" />
+            <source src="/agent-collab-demo.mp4" type="video/mp4" />
           </video>
         ) : (
-          // Same URL as the video poster, so the browser cache is shared.
           <Image
             src={POSTER}
             alt={ALT}
-            width={1440}
-            height={802}
+            width={720}
+            height={720}
             unoptimized
             className="w-full"
           />
@@ -77,19 +75,9 @@ export default function OfficeView() {
           </button>
         )}
       </div>
-      <figcaption className="flex flex-wrap items-center justify-between gap-2 border-t border-edge bg-night/60 px-4 py-2.5 text-xs text-slate-400">
-        <span>
-          emily · eugene · carlos · marcus · scarlett — live in the{" "}
-          <span className="font-mono text-accent-soft">Lionclaw</span> office
-        </span>
-        <a
-          href="https://dashboard20-theta.vercel.app/overview"
-          target="_blank"
-          rel="noreferrer"
-          className="shrink-0 transition-colors hover:text-accent-soft"
-        >
-          Open Lionclaw ↗
-        </a>
+      <figcaption className="border-t border-edge bg-night/60 px-4 py-2.5 text-xs leading-relaxed text-slate-400">
+        <span aria-hidden="true">🐸</span> Eugene spots Carlos deep in work —
+        and runs over to pair up. Sped up 2×, captured live.
       </figcaption>
     </figure>
   );
