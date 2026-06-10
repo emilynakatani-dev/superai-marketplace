@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CURRENCIES, DEFAULT_CURRENCY, getCurrency } from "@/lib/currencies";
+import {
+  CURRENCIES,
+  DEFAULT_CURRENCY,
+  convertFromUsd,
+  getCurrency,
+} from "@/lib/currencies";
 
 interface Props {
   agentId: string;
@@ -32,6 +37,8 @@ export default function PurchasePanel({
   const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY);
 
   const currency = getCurrency(currencyCode);
+  // Listing prices are USD; show (and charge) the FX-converted local amount.
+  const localAmount = convertFromUsd(amount, currencyCode);
   const storageKey = `project-mural:owned:${agentId}`;
 
   useEffect(() => {
@@ -95,11 +102,14 @@ export default function PurchasePanel({
       <div className="flex items-baseline gap-1.5">
         <span className="text-3xl font-bold text-white">
           {currency.symbol}
-          {amount}
+          {localAmount}
         </span>
         <span className="text-sm text-slate-400">
           {isSub ? "/ month" : "one-time"}
         </span>
+        {currencyCode !== "usd" && (
+          <span className="text-xs text-slate-500">≈ ${amount} USD</span>
+        )}
       </div>
       <p className="mt-1 text-xs text-slate-500">
         {isSub
@@ -158,8 +168,8 @@ export default function PurchasePanel({
           {loading
             ? "Redirecting to checkout…"
             : isSub
-              ? `Subscribe — ${currency.symbol}${amount}/mo`
-              : `Buy ${agentName} — ${currency.symbol}${amount}`}
+              ? `Subscribe — ${currency.symbol}${localAmount}/mo`
+              : `Buy ${agentName} — ${currency.symbol}${localAmount}`}
         </button>
       )}
 

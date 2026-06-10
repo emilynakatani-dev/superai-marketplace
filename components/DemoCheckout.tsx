@@ -10,7 +10,10 @@ interface Props {
   agentName: string;
   tagline: string;
   avatar: string;
+  /** Already FX-converted into the display currency. */
   amount: number;
+  /** Currency symbol matching `amount`, e.g. "S$". */
+  symbol: string;
   isSubscription: boolean;
 }
 
@@ -20,6 +23,7 @@ export default function DemoCheckout({
   tagline,
   avatar,
   amount,
+  symbol,
   isSubscription,
 }: Props) {
   const router = useRouter();
@@ -66,7 +70,8 @@ export default function DemoCheckout({
             </div>
           </div>
           <p className="mt-3 text-2xl font-bold text-white">
-            ${amount}
+            {symbol}
+            {amount}
             <span className="ml-1 text-sm font-normal text-slate-400">
               {isSubscription ? "per month" : "one-time"}
             </span>
@@ -109,8 +114,8 @@ export default function DemoCheckout({
             {paying
               ? "Processing…"
               : isSubscription
-                ? `Subscribe $${amount}/mo`
-                : `Pay $${amount}`}
+                ? `Subscribe ${symbol}${amount}/mo`
+                : `Pay ${symbol}${amount}`}
           </button>
 
           <Link

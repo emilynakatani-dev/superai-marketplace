@@ -1,4 +1,5 @@
 import { agents, type PricingModel } from "./agents";
+import { convertFromUsd } from "./currencies";
 import { getPerson } from "./people";
 
 /** Project Mural's marketplace take-rate on every sale. */
@@ -37,7 +38,9 @@ export function getCreatorEarnings(slug: string): CreatorEarnings | null {
     if (!isSpecialist && !isBuilder) continue;
 
     const units = a.reviewCount;
-    const pool = a.pricing.amount * units * (1 - PLATFORM_TAKE);
+    // Listing prices are USD; earnings are tracked and paid out in SGD, so
+    // convert per sale to match what buyers are actually charged.
+    const pool = convertFromUsd(a.pricing.amount, "sgd") * units * (1 - PLATFORM_TAKE);
     const same = a.credits.specialist === a.credits.builder;
 
     let share: number;

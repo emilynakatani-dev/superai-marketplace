@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { getAgent } from "@/lib/agents";
-import { CURRENCY_CODES, DEFAULT_CURRENCY } from "@/lib/currencies";
+import {
+  CURRENCY_CODES,
+  DEFAULT_CURRENCY,
+  convertFromUsd,
+} from "@/lib/currencies";
 
 export async function POST(request: NextRequest) {
   let agentId: unknown;
@@ -28,9 +32,11 @@ export async function POST(request: NextRequest) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
 
   // Demo mode: no Stripe keys configured — use the built-in mock checkout.
+  // Forward the currency so the mock page shows the same converted price
+  // the buy button promised.
   if (!secretKey) {
     return NextResponse.json({
-      url: `/checkout/demo?agent=${agent.id}`,
+      url: `/checkout/demo?agent=${agent.id}&currency=${currency}`,
       demo: true,
     });
   }
@@ -49,7 +55,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
           price_data: {
             currency,
-            unit_amount: agent.pricing.amount * 100,
+            // Listing prices are USD; charge the FX-converted local amount.
+            unit_amount: convertFromUsd(agent.pricing.amount, currency) * 100,
             product_data: {
               name: `${agent.name} — expert agent`,
               description: agent.tagline,
