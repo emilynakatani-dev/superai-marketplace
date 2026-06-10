@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import EarningsPanel from "@/components/EarningsPanel";
 import Stars from "@/components/Stars";
 import { agents, getAgentCredits } from "@/lib/agents";
+import { getCreatorEarnings } from "@/lib/earnings";
 import { getPerson, people } from "@/lib/people";
 
 export function generateStaticParams() {
@@ -31,6 +33,8 @@ export default async function CreatorPage({
   const { slug } = await params;
   const person = getPerson(slug);
   if (!person) notFound();
+
+  const earnings = getCreatorEarnings(slug);
 
   // Agents this person is credited on, and in which role.
   const credited = agents
@@ -134,6 +138,12 @@ export default async function CreatorPage({
           )}
         </div>
       </div>
+
+      {earnings && earnings.lifetime > 0 && (
+        <div className="mt-6">
+          <EarningsPanel slug={person.slug} earnings={earnings} />
+        </div>
+      )}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold text-white">

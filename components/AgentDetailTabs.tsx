@@ -268,12 +268,24 @@ function SkillCard({ skill }: { skill: AgentSkill }) {
 }
 
 function ReviewsTab({ agent }: { agent: Agent }) {
-  // Distribution derived from the sample reviews shown.
-  const dist = [5, 4, 3, 2, 1].map((star) => ({
+  const [filter, setFilter] = useState<number | "all">("all");
+
+  // Full distribution across all ratings (sums to reviewCount).
+  const dist = ([5, 4, 3, 2, 1] as const).map((star) => ({
     star,
-    count: agent.reviews.filter((r) => Math.round(r.rating) === star).length,
+    count: agent.reviewBreakdown[star],
   }));
-  const total = agent.reviews.length || 1;
+  const total = agent.reviewCount || 1;
+
+  // Written reviews (the ones with comments) are what the filter acts on.
+  const written = agent.reviews;
+  const writtenByStar = (star: number) =>
+    written.filter((r) => Math.round(r.rating) === star).length;
+  const starsWithReviews = [5, 4, 3, 2, 1].filter((s) => writtenByStar(s) > 0);
+  const visible =
+    filter === "all"
+      ? written
+      : written.filter((r) => Math.round(r.rating) === filter);
 
   return (
     <div className="space-y-6">
@@ -309,38 +321,84 @@ function ReviewsTab({ agent }: { agent: Agent }) {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {agent.reviews.map((r) => (
-          <div key={r.author + r.date} className="rounded-2xl border border-edge bg-panel p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-white">{r.author}</p>
-                {r.role && <p className="text-xs text-slate-500">{r.role}</p>}
+      <div>
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-sm font-semibold text-white">
+            Written reviews
+          </span>
+          <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
+            All ({written.length})
+          </FilterChip>
+          {starsWithReviews.map((s) => (
+            <FilterChip key={s} active={filter === s} onClick={() => setFilter(s)}>
+              {s}★ ({writtenByStar(s)})
+            </FilterChip>
+          ))}
+        </div>
+
+        {visible.length === 0 ? (
+          <p className="rounded-xl border border-edge bg-panel px-4 py-6 text-center text-sm text-slate-500">
+            No written reviews at this rating.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {visible.map((r) => (
+              <div key={r.author + r.date} className="rounded-2xl border border-edge bg-panel p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{r.author}</p>
+                    {r.role && <p className="text-xs text-slate-500">{r.role}</p>}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <Stars value={r.rating} />
+                    <span className="text-[11px] text-slate-500">{r.date}</span>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{r.body}</p>
+                {r.verifiedPurchase && (
+                  <p className="mt-2 inline-flex items-center gap-1 text-[11px] text-emerald-400">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Verified purchase
+                  </p>
+                )}
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <Stars value={r.rating} />
-                <span className="text-[11px] text-slate-500">{r.date}</span>
-              </div>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">{r.body}</p>
-            {r.verifiedPurchase && (
-              <p className="mt-2 inline-flex items-center gap-1 text-[11px] text-emerald-400">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M5 13l4 4L19 7"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                Verified purchase
-              </p>
-            )}
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
+  );
+}
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+        active
+          ? "border-accent bg-accent/15 text-white"
+          : "border-edge bg-panel text-slate-400 hover:border-edge-bright hover:text-slate-200"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 

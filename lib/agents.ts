@@ -53,6 +53,8 @@ export interface Review {
   verifiedPurchase?: boolean;
 }
 
+export type RatingBreakdown = Record<1 | 2 | 3 | 4 | 5, number>;
+
 export interface Agent {
   id: string;
   name: string;
@@ -80,6 +82,8 @@ export interface Agent {
   pricing: AgentPricing;
   rating: number;
   reviewCount: number;
+  /** Full distribution across all ratings (sums to reviewCount). */
+  reviewBreakdown: RatingBreakdown;
   runs: number;
   featured: boolean;
 }
@@ -212,6 +216,7 @@ export const agents: Agent[] = [
     pricing: { model: "one_time", amount: 49, currency: "usd" },
     rating: 4.9,
     reviewCount: 214,
+    reviewBreakdown: { 5: 198, 4: 13, 3: 2, 2: 1, 1: 0 },
     runs: 1284,
     featured: true,
   },
@@ -305,6 +310,7 @@ export const agents: Agent[] = [
     pricing: { model: "subscription", amount: 29, currency: "usd", interval: "month" },
     rating: 4.7,
     reviewCount: 156,
+    reviewBreakdown: { 5: 128, 4: 18, 3: 6, 2: 3, 1: 1 },
     runs: 2371,
     featured: true,
   },
@@ -383,6 +389,7 @@ export const agents: Agent[] = [
     pricing: { model: "one_time", amount: 99, currency: "usd" },
     rating: 4.8,
     reviewCount: 91,
+    reviewBreakdown: { 5: 78, 4: 9, 3: 3, 2: 1, 1: 0 },
     runs: 642,
     featured: false,
   },
@@ -459,6 +466,7 @@ export const agents: Agent[] = [
     pricing: { model: "subscription", amount: 19, currency: "usd", interval: "month" },
     rating: 4.6,
     reviewCount: 188,
+    reviewBreakdown: { 5: 140, 4: 30, 3: 12, 2: 4, 1: 2 },
     runs: 3105,
     featured: false,
   },
@@ -544,6 +552,7 @@ export const agents: Agent[] = [
     pricing: { model: "subscription", amount: 39, currency: "usd", interval: "month" },
     rating: 4.8,
     reviewCount: 103,
+    reviewBreakdown: { 5: 88, 4: 10, 3: 3, 2: 1, 1: 1 },
     runs: 958,
     featured: false,
   },
