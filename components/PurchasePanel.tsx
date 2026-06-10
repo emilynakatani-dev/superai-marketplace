@@ -29,7 +29,7 @@ export default function PurchasePanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const storageKey = `clonemarket:owned:${agentId}`;
+  const storageKey = `project-mural:owned:${agentId}`;
 
   useEffect(() => {
     if (justPurchased) {
@@ -201,6 +201,23 @@ export default function PurchasePanel({
             ),
           )}
         </div>
+        {owned && (
+          <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-500">
+            <svg
+              className="mt-0.5 shrink-0 text-slate-500"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="2" />
+              <path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            Each download is watermarked and licensed to you — single-seat,
+            no redistribution. Agents run hosted by default.
+          </p>
+        )}
       </div>
     </div>
   );

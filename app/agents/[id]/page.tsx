@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AgentDetailTabs from "@/components/AgentDetailTabs";
+import CreatorCard from "@/components/CreatorCard";
 import PurchasePanel from "@/components/PurchasePanel";
 import Stars from "@/components/Stars";
 import { agents, getAgent } from "@/lib/agents";
@@ -22,9 +24,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const agent = getAgent(id);
-  if (!agent) return { title: "Agent not found — CloneMarket" };
+  if (!agent) return { title: "Agent not found — Project Mural" };
   return {
-    title: `${agent.name} — CloneMarket`,
+    title: `${agent.name} — Project Mural`,
     description: agent.tagline,
   };
 }
@@ -115,78 +117,7 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
             />
           </div>
 
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold text-white">About this agent</h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              {agent.description}
-            </p>
-          </section>
-
-          <section className="mt-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">
-                The expert workflow
-              </h2>
-              <span className="rounded-full border border-edge-bright bg-panel-2 px-2.5 py-1 text-[11px] font-medium text-accent-soft">
-                workflows, not prompts
-              </span>
-            </div>
-            <ol className="mt-3 space-y-2">
-              {agent.workflow.map((step, i) => (
-                <li
-                  key={step}
-                  className="flex items-start gap-3 rounded-xl border border-edge bg-panel px-4 py-3"
-                >
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-edge-bright bg-panel-2 font-mono text-xs font-bold text-accent-soft">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm leading-relaxed text-slate-300">
-                    {step}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          {agent.tools.length > 0 && (
-            <section className="mt-8">
-              <h2 className="text-lg font-semibold text-white">Wired tools</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {agent.tools.map((tool) => (
-                  <span
-                    key={tool}
-                    className="rounded-lg border border-edge bg-night px-2.5 py-1 font-mono text-xs text-glow"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="mt-8">
-            <h2 className="text-lg font-semibold text-white">Under the hood</h2>
-            <dl className="mt-3 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-edge bg-panel px-4 py-3">
-                <dt className="text-xs text-slate-500">Model</dt>
-                <dd className="mt-1 font-mono text-xs text-slate-300">
-                  {agent.model}
-                </dd>
-              </div>
-              <div className="rounded-xl border border-edge bg-panel px-4 py-3">
-                <dt className="text-xs text-slate-500">Memory</dt>
-                <dd className="mt-1 text-xs text-slate-300">
-                  Self-learning, hourly consolidation
-                </dd>
-              </div>
-              <div className="rounded-xl border border-edge bg-panel px-4 py-3">
-                <dt className="text-xs text-slate-500">Runs on</dt>
-                <dd className="mt-1 font-mono text-xs text-slate-300">
-                  lionclaw · openclaw · hermes
-                </dd>
-              </div>
-            </dl>
-          </section>
+          <AgentDetailTabs agent={agent} />
         </div>
 
         {/* Right column — purchase + creator */}
@@ -202,59 +133,7 @@ export default async function AgentPage({ params, searchParams }: PageParams) {
             />
           </div>
 
-          <div className="rounded-2xl border border-edge bg-panel p-5">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-500">
-              Created by
-            </h3>
-            <div className="mt-3 flex items-center gap-3">
-              <span
-                className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-night"
-                style={{ backgroundColor: agent.color }}
-              >
-                {agent.creator.name
-                  .split(" ")
-                  .map((part) => part[0])
-                  .join("")}
-              </span>
-              <div>
-                <p className="flex items-center gap-1.5 text-sm font-semibold text-white">
-                  {agent.creator.name}
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    role="img"
-                    aria-label="Verified expert"
-                  >
-                    <circle cx="12" cy="12" r="10" fill="#3b82f6" />
-                    <path
-                      d="M8 12.5l2.5 2.5L16 9.5"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </p>
-                <p className="text-xs text-slate-500">{agent.creator.title}</p>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-              <Stars value={agent.creator.rating} />
-              <span className="font-medium text-slate-300">
-                {agent.creator.rating}
-              </span>
-              <span>
-                ({agent.creator.reviewCount} reviews ·{" "}
-                {agent.creator.agentsPublished}{" "}
-                {agent.creator.agentsPublished === 1 ? "agent" : "agents"})
-              </span>
-            </div>
-            <p className="mt-3 border-t border-edge pt-3 text-xs leading-relaxed text-slate-400">
-              {agent.creator.bio}
-            </p>
-          </div>
+          <CreatorCard agent={agent} />
         </div>
       </div>
     </div>

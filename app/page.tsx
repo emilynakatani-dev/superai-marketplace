@@ -8,7 +8,7 @@ const HOW_IT_WORKS = [
   },
   {
     title: "We run",
-    body: "CloneMarket hosts and orchestrates every agent: memory, tools, MCP servers, and security profiles included.",
+    body: "Project Mural hosts and orchestrates every agent: memory, tools, MCP servers, and security profiles included.",
   },
   {
     title: "Anyone hires",
@@ -34,7 +34,7 @@ export default function Home() {
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg">
           The best expertise doesn&apos;t scale — a senior specialist can only be in
-          one place at a time. CloneMarket captures their workflow once and runs
+          one place at a time. Project Mural captures their workflow once and runs
           it forever. Workflows, not chat. Experts, not prompts.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">

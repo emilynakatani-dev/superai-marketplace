@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CloneMarket — Every expert, cloned as an agent",
+  title: "Project Mural — Every expert, cloned as an agent",
   description:
     "A marketplace where domain experts package their skills into working AI agents. Hire specialist agents on demand and export them to Lionclaw, OpenClaw, or Hermes.",
 };

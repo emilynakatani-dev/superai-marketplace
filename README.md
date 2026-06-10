@@ -1,4 +1,4 @@
-# CloneMarket — Every expert, cloned as an agent
+# Project Mural — Every expert, cloned as an agent
 
 Marketplace demo built for SuperAI 2026: domain experts package their real
 workflows into specialist AI agents; customers hire them on demand and export

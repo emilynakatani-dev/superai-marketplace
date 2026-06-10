@@ -4,7 +4,7 @@ import DemoCheckout from "@/components/DemoCheckout";
 import { getAgent } from "@/lib/agents";
 
 export const metadata: Metadata = {
-  title: "Checkout — CloneMarket",
+  title: "Checkout — Project Mural",
 };
 
 export default async function DemoCheckoutPage({

@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import Stars from "@/components/Stars";
-import { formatPrice, type Agent } from "@/lib/agents";
+import { formatPrice, getAgentCredits, type Agent } from "@/lib/agents";
 
 export default function AgentCard({ agent }: { agent: Agent }) {
+  const credits = getAgentCredits(agent);
   return (
     <Link
       href={`/agents/${agent.id}`}
@@ -30,7 +31,9 @@ export default function AgentCard({ agent }: { agent: Agent }) {
                 {agent.emoji}
               </span>
             </h3>
-            <p className="text-xs text-slate-500">by {agent.creator.name}</p>
+            <p className="text-xs text-slate-500">
+              by {credits?.specialist.name ?? "—"}
+            </p>
           </div>
         </div>
         <span className="whitespace-nowrap rounded-full border border-edge-bright bg-night px-2.5 py-1 text-xs font-semibold text-accent-soft">
